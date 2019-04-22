@@ -1,20 +1,24 @@
 <template>
   <div id="app">
-    <landing-page></landing-page>
+    <main-page></main-page>
   </div>
 </template>
 
 <script>
-  import LandingPage from '@/components/LandingPage';
+import MainPage from '@/components/MainPage';
 
-  export default {
-    name: 'hand-pose-annotator',
-    components: {
-      LandingPage,
-    },
-  };
+export default {
+  name: 'hand-pose-annotator',
+  components: {
+    MainPage,
+  },
+};
 </script>
 
-<style>
-  /* CSS */
+<style lang="scss" scoped>
+#app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 </style>

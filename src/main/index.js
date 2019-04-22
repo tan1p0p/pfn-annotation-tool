@@ -21,6 +21,9 @@ function createWindow() {
     height: 563,
     useContentSize: true,
     width: 1000,
+    webPreferences: {
+      webSecurity: process.env.NODE_ENV !== 'development',
+    },
   });
 
   mainWindow.loadURL(winURL);
