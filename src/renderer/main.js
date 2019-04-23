@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import VueKonva from 'vue-konva';
+import VueKonva from '../../node_modules/vue-konva/umd/vue-konva.js';
 
 import App from './App';
 

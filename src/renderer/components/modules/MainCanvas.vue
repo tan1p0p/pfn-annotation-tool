@@ -1,5 +1,12 @@
 <template>
-  <canvas width="600" height="600"></canvas>
+  <v-stage class="stage" :config="stageConfig">
+    <v-layer>
+      <v-circle v-for="(dotConfig, i) in dotConfigList" :key="i"
+        :config="dotConfig" @dragmove="updatePos"></v-circle>
+      <v-line v-for="(lineConfig, j) in lineConfigList" :key="j + 16"
+        :config="lineConfig"></v-line>
+    </v-layer>
+  </v-stage>
 </template>
 
 <script>
@@ -7,47 +14,85 @@ export default {
   name: 'MainCanvas',
   props: {
     filepath: String,
-    handPos: Array,
+    firstHandPos: Array,
   },
-  mounted() {
-    this.ctx = this.$el.getContext('2d');
+  data() {
+    return {
+      stageConfig: {
+        width: 600,
+        height: 600,
+      },
+      handPos: [],
+      lineConfigList: [],
+    };
+  },
+  computed: {
+    dotConfigList() {
+      const dotConfigList = [];
+      if (this.handPos.length === 16) {
+        for (let i = 0; i < this.handPos.length; i += 1) {
+          const dotConfig = {
+            x: this.handPos[i][0],
+            y: this.handPos[i][1],
+            radius: 5,
+            fill: 'red',
+            stroke: 'black',
+            strokeWidth: 1,
+            draggable: true,
+          };
+          dotConfigList[i] = dotConfig;
+        }
+      }
+      return dotConfigList;
+    },
   },
   watch: {
+    // Run when image file changes.
     filepath() {
+      this.handPos = this.firstHandPos;
+      this.setLineConfigList();
       this.$el.style.backgroundImage = `url(file://${this.filepath})`;
-      this.renderPos();
     },
   },
   methods: {
-    renderPos() {
-      for (let i = 0; i < this.handPos.length; i += 1) {
-        this.drawPoints(this.handPos[i][0], this.handPos[i][1]);
-      }
-      for (let i = 0; i < 5; i += 1) {
-        this.drawPath(this.handPos[0], this.handPos[(3 * i) + 3]);
-        this.drawPath(this.handPos[(3 * i) + 3], this.handPos[(3 * i) + 2]);
-        this.drawPath(this.handPos[(3 * i) + 2], this.handPos[(3 * i) + 1]);
-      }
+    updatePos(event) {
+      this.setNewHandPos(event);
+      this.setLineConfigList();
     },
-    drawPoints(x, y) {
-      this.ctx.beginPath();
-      this.ctx.arc(x, y, 5, 0, Math.PI * 2, false);
-      this.ctx.fill();
-      this.ctx.stroke();
+    setNewHandPos(event) {
+      const { x, y } = event.target.attrs;
+      const dotIndex = event.target.index;
+      this.handPos[dotIndex] = [x, y];
     },
-    drawPath(pos1, pos2) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(pos1[0], pos1[1]);
-      this.ctx.lineTo(pos2[0], pos2[1]);
-      this.ctx.closePath();
-      this.ctx.stroke();
+    setLineConfigList() {
+      const lineConfigList = [];
+      if (this.handPos.length === 16) {
+        for (let i = 0; i < 5; i += 1) {
+          const points = [
+            this.handPos[(3 * i) + 1][0], this.handPos[(3 * i) + 1][1],
+            this.handPos[(3 * i) + 2][0], this.handPos[(3 * i) + 2][1],
+            this.handPos[(3 * i) + 3][0], this.handPos[(3 * i) + 3][1],
+            this.handPos[0][0], this.handPos[0][1],
+          ];
+          const lineConfig = {
+            x: 0,
+            y: 0,
+            points,
+            stroke: 'black',
+            strokeWidth: 1,
+          };
+          lineConfigList[i] = lineConfig;
+        }
+      }
+      this.lineConfigList = lineConfigList;
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-canvas {
+.stage {
   background-size: 600px 600px;
+  background-repeat: no-repeat;
 }
 </style>
