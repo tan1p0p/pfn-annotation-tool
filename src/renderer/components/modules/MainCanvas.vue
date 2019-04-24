@@ -1,10 +1,12 @@
 <template>
   <v-stage class="stage" :config="stageConfig">
     <v-layer>
+      <v-line v-for="(lineConfig, i) in lineConfigList" :key="i"
+        :config="lineConfig"></v-line>
+    </v-layer>
+    <v-layer>
       <v-circle v-for="(dotConfig, i) in dotConfigList" :key="i"
         :config="dotConfig" @dragmove="updatePos"></v-circle>
-      <v-line v-for="(lineConfig, j) in lineConfigList" :key="j + 16"
-        :config="lineConfig"></v-line>
     </v-layer>
   </v-stage>
 </template>
@@ -38,13 +40,31 @@ export default {
   methods: {
     updatePos(event) {
       this.setNewHandPos(event);
-      this.setLineConfigList();
       this.setDotConfigList();
+      this.setLineConfigList();
     },
     setNewHandPos(event) {
       const { x, y } = event.target.attrs;
       const dotIndex = event.target.index;
       this.$parent.posList[this.imageIdx][dotIndex] = [x, y];
+    },
+    setDotConfigList() {
+      const dotConfigList = [];
+      if (this.imageIdx > -1) {
+        for (let i = 0; i < this.handPos.length; i += 1) {
+          const dotConfig = {
+            x: this.handPos[i][0],
+            y: this.handPos[i][1],
+            radius: 5,
+            fill: 'red',
+            stroke: 'black',
+            strokeWidth: 1,
+            draggable: true,
+          };
+          dotConfigList[i] = dotConfig;
+        }
+      }
+      this.dotConfigList = dotConfigList;
     },
     setLineConfigList() {
       const lineConfigList = [];
@@ -67,24 +87,6 @@ export default {
         }
       }
       this.lineConfigList = lineConfigList;
-    },
-    setDotConfigList() {
-      const dotConfigList = [];
-      if (this.imageIdx > -1) {
-        for (let i = 0; i < this.handPos.length; i += 1) {
-          const dotConfig = {
-            x: this.handPos[i][0],
-            y: this.handPos[i][1],
-            radius: 5,
-            fill: 'red',
-            stroke: 'black',
-            strokeWidth: 1,
-            draggable: true,
-          };
-          dotConfigList[i] = dotConfig;
-        }
-      }
-      this.dotConfigList = dotConfigList;
     },
   },
 };
