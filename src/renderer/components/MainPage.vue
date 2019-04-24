@@ -1,7 +1,7 @@
 <template>
   <div>
     <folder-picker @set-folder="setFilelist"></folder-picker>
-    <main-canvas :filepath="fileList[imageIdx]" :firstHandPos="posList[imageIdx]"></main-canvas>
+    <main-canvas :filepath="currentFilePath" :handPos="currentHandPos" :imageIdx="imageIdx"></main-canvas>
   </div>
 </template>
 
@@ -29,6 +29,23 @@ export default {
       imageIdx: -1,
     };
   },
+  computed: {
+    currentFilePath() {
+      return this.fileList[this.imageIdx];
+    },
+    currentHandPos() {
+      return this.posList[this.imageIdx];
+    },
+  },
+  mounted() {
+    window.addEventListener('keydown', (event) => {
+      if (event.keyCode === 78) {
+        this.goNextImage();
+      } else if (event.keyCode === 66) {
+        this.goPreviousImage();
+      }
+    });
+  },
   methods: {
     setFilelist(folderPath) {
       this.folderPath = folderPath;
@@ -37,7 +54,7 @@ export default {
       for (let i = 0; i < files.length; i += 1) {
         const filename = files[i];
         const ext = path.extname(filename);
-        if (ext === '.jpg' || ext === 'jpeg' || ext === '.png') {
+        if (ext === '.jpg' || ext === '.jpeg' || ext === '.png') {
           this.fileList.push(`${folderPath}/${filename}`);
         }
       }
@@ -50,8 +67,21 @@ export default {
         [100, 350], [200, 350], [300, 350], // middle,
         [100, 450], [200, 450], [300, 450], // ring,
         [100, 550], [200, 550], [300, 550]];// pickle,
-      this.posList = new Array(this.fileList.length).fill(defaultPos);
+      this.posList = new Array(this.fileList.length);
+      for (let i = 0; i < this.posList.length; i += 1) {
+        this.posList[i] = Array.from(defaultPos);
+      }
       this.imageIdx = 0;
+    },
+    goNextImage() {
+      if (this.imageIdx < this.fileList.length - 1) {
+        this.imageIdx += 1;
+      }
+    },
+    goPreviousImage() {
+      if (this.imageIdx > 0) {
+        this.imageIdx -= 1;
+      }
     },
   },
 };

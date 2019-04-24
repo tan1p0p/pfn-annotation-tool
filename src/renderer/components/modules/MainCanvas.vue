@@ -14,7 +14,8 @@ export default {
   name: 'MainCanvas',
   props: {
     filepath: String,
-    firstHandPos: Array,
+    handPos: Array,
+    imageIdx: Number,
   },
   data() {
     return {
@@ -22,35 +23,15 @@ export default {
         width: 600,
         height: 600,
       },
-      handPos: [],
       lineConfigList: [],
+      dotConfigList: [],
     };
-  },
-  computed: {
-    dotConfigList() {
-      const dotConfigList = [];
-      if (this.handPos.length === 16) {
-        for (let i = 0; i < this.handPos.length; i += 1) {
-          const dotConfig = {
-            x: this.handPos[i][0],
-            y: this.handPos[i][1],
-            radius: 5,
-            fill: 'red',
-            stroke: 'black',
-            strokeWidth: 1,
-            draggable: true,
-          };
-          dotConfigList[i] = dotConfig;
-        }
-      }
-      return dotConfigList;
-    },
   },
   watch: {
     // Run when image file changes.
     filepath() {
-      this.handPos = this.firstHandPos;
       this.setLineConfigList();
+      this.setDotConfigList();
       this.$el.style.backgroundImage = `url(file://${this.filepath})`;
     },
   },
@@ -58,15 +39,16 @@ export default {
     updatePos(event) {
       this.setNewHandPos(event);
       this.setLineConfigList();
+      this.setDotConfigList();
     },
     setNewHandPos(event) {
       const { x, y } = event.target.attrs;
       const dotIndex = event.target.index;
-      this.handPos[dotIndex] = [x, y];
+      this.$parent.posList[this.imageIdx][dotIndex] = [x, y];
     },
     setLineConfigList() {
       const lineConfigList = [];
-      if (this.handPos.length === 16) {
+      if (this.imageIdx > -1) {
         for (let i = 0; i < 5; i += 1) {
           const points = [
             this.handPos[(3 * i) + 1][0], this.handPos[(3 * i) + 1][1],
@@ -85,6 +67,24 @@ export default {
         }
       }
       this.lineConfigList = lineConfigList;
+    },
+    setDotConfigList() {
+      const dotConfigList = [];
+      if (this.imageIdx > -1) {
+        for (let i = 0; i < this.handPos.length; i += 1) {
+          const dotConfig = {
+            x: this.handPos[i][0],
+            y: this.handPos[i][1],
+            radius: 5,
+            fill: 'red',
+            stroke: 'black',
+            strokeWidth: 1,
+            draggable: true,
+          };
+          dotConfigList[i] = dotConfig;
+        }
+      }
+      this.dotConfigList = dotConfigList;
     },
   },
 };
