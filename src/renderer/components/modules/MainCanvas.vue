@@ -16,7 +16,10 @@ export default {
   name: 'MainCanvas',
   props: {
     filepath: String,
-    handPos: Array,
+    handPos: {
+      type: Array,
+      deep: true,
+    },
     imageIdx: Number,
   },
   data() {
@@ -27,6 +30,14 @@ export default {
       },
       lineConfigList: [],
       dotConfigList: [],
+      colorList: [
+        'black',
+        'hsl(0, 100%, 50%)',
+        'hsl(72, 100%, 50%)',
+        'hsl(144, 100%, 50%)',
+        'hsl(216, 100%, 50%)',
+        'hsl(288, 100%, 50%)',
+      ],
     };
   },
   watch: {
@@ -38,10 +49,13 @@ export default {
     },
   },
   methods: {
-    updatePos(event) {
-      this.setNewHandPos(event);
+    render() {
       this.setDotConfigList();
       this.setLineConfigList();
+    },
+    updatePos(event) {
+      this.setNewHandPos(event);
+      this.render();
     },
     setNewHandPos(event) {
       const { x, y } = event.target.attrs;
@@ -52,11 +66,15 @@ export default {
       const dotConfigList = [];
       if (this.imageIdx > -1) {
         for (let i = 0; i < this.handPos.length; i += 1) {
+          let fill = this.colorList[0];
+          if (i > 0) {
+            fill = this.colorList[Math.ceil(i / 3)];
+          }
           const dotConfig = {
             x: this.handPos[i][0],
             y: this.handPos[i][1],
             radius: 5,
-            fill: 'red',
+            fill,
             stroke: 'black',
             strokeWidth: 1,
             draggable: true,

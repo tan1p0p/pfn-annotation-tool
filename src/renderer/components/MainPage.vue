@@ -1,7 +1,11 @@
 <template>
   <div>
     <folder-picker @set-folder="setFilelist"></folder-picker>
-    <main-canvas :filepath="currentFilePath" :handPos="currentHandPos" :imageIdx="imageIdx"></main-canvas>
+    <main-canvas
+      ref="mainCanvas"
+      :filepath="currentFilePath"
+      :handPos="currentHandPos"
+      :imageIdx="imageIdx"></main-canvas>
   </div>
 </template>
 
@@ -26,7 +30,16 @@ export default {
       //            pointer..., middle..., ring..., pinkie...], ...]
       // Each point has [width, height] array.
       posList: [],
+      // TODO: make isImageLoaded prop.
       imageIdx: -1,
+      defaultPos: [
+        [410, 350],
+        [310, 100], [360, 150], [410, 200],
+        [130, 210], [210, 230], [290, 250],
+        [110, 330], [190, 330], [270, 330],
+        [130, 440], [210, 420], [300, 400],
+        [190, 530], [250, 500], [320, 450],
+      ],
     };
   },
   computed: {
@@ -45,6 +58,13 @@ export default {
         this.goPreviousImage();
       }
     });
+    window.addEventListener('keyup', (event) => {
+      if (event.keyCode === 83) {
+        this.downloadPosList();
+      } else if (event.keyCode === 82) {
+        this.resetCurrentPos();
+      }
+    });
   },
   methods: {
     setFilelist(folderPath) {
@@ -58,18 +78,9 @@ export default {
           this.fileList.push(`${folderPath}/${filename}`);
         }
       }
-      // TODO: Set default value like human hand pos.
-      // const defaultPos = new Array(16).fill([0, 0]);
-      const defaultPos = [
-        [400, 400], // origin
-        [300, 150], [350, 150], [400, 150], // thumb_DIP, thumb_PIP, thumb_MP,
-        [100, 250], [200, 250], [300, 250], // pointer,
-        [100, 350], [200, 350], [300, 350], // middle,
-        [100, 450], [200, 450], [300, 450], // ring,
-        [100, 550], [200, 550], [300, 550]];// pickle,
       this.posList = new Array(this.fileList.length);
       for (let i = 0; i < this.posList.length; i += 1) {
-        this.posList[i] = Array.from(defaultPos);
+        this.posList[i] = Array.from(this.defaultPos);
       }
       this.imageIdx = 0;
     },
@@ -81,6 +92,23 @@ export default {
     goPreviousImage() {
       if (this.imageIdx > 0) {
         this.imageIdx -= 1;
+      }
+    },
+    downloadPosList() {
+      if (this.imageIdx >= 0) {
+        const outputJSON = {
+          fileList: this.fileList,
+          posList: this.posList,
+        };
+        fs.writeFileSync(`${this.folderPath}/hand_position.json`, JSON.stringify(outputJSON));
+      }
+    },
+    resetCurrentPos() {
+      if (this.imageIdx >= 0) {
+        for (let i = 0; i < this.defaultPos.length; i += 1) {
+          this.posList[this.imageIdx][i] = this.defaultPos[i];
+        }
+        this.$refs.mainCanvas.render();
       }
     },
   },
