@@ -1,6 +1,6 @@
 <template>
   <div>
-    <folder-picker @set-folder="setFilelist"></folder-picker>
+    <data-loader @set-path="loadFiles"></data-loader>
     <main-canvas
       ref="mainCanvas"
       :filepath="currentFilePath"
@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import FolderPicker from '@/components/modules/FolderPicker';
+import DataLoader from '@/components/modules/DataLoader';
 import MainCanvas from '@/components/modules/MainCanvas';
 
 import fs from 'fs';
@@ -19,12 +19,15 @@ import path from 'path';
 export default {
   name: 'main-page',
   components: {
-    FolderPicker,
+    DataLoader,
     MainCanvas,
   },
   data() {
     return {
+      width: 600,
+      height: 600,
       folderPath: '',
+      JSONPath: '',
       fileList: [],
       // posList: [[origin, thumb_DIP, thumb_PIP, thumb_MP,
       //            pointer..., middle..., ring..., pinkie...], ...]
@@ -52,22 +55,48 @@ export default {
   },
   mounted() {
     window.addEventListener('keydown', (event) => {
-      if (event.keyCode === 78) {
-        this.goNextImage();
-      } else if (event.keyCode === 66) {
-        this.goPreviousImage();
+      if (this.imageIdx >= 0) {
+        switch (event.keyCode) {
+          case 78: // 'n' key for next pic.
+            this.goNextImage();
+            break;
+          case 66: // 'b' key for previous pic.
+            this.goPreviousImage();
+            break;
+          default:
+            break;
+        }
       }
     });
     window.addEventListener('keyup', (event) => {
-      if (event.keyCode === 83) {
-        this.downloadPosList();
-      } else if (event.keyCode === 82) {
-        this.resetCurrentPos();
+      if (this.imageIdx >= 0) {
+        switch (event.keyCode) {
+          case 83: // 's' key for save pos.
+            this.downloadPosList();
+            break;
+          case 82: // 'r' key for reset to default pos.
+            this.resetCurrentPos();
+            break;
+          case 90: // 'z' key for flip horizontal.
+            this.flipPos('horizontal');
+            break;
+          case 88: // 'x' key for flip vertical.
+            this.flipPos('vertical');
+            break;
+          default:
+            break;
+        }
       }
     });
   },
   methods: {
-    setFilelist(folderPath) {
+    loadFiles([imageDir, JSONPath]) {
+      this.loadImages(imageDir);
+      if (JSONPath !== '') {
+        this.loadHandPos(JSONPath);
+      }
+    },
+    loadImages(folderPath) {
       this.folderPath = folderPath;
 
       const files = fs.readdirSync(folderPath);
@@ -84,32 +113,42 @@ export default {
       }
       this.imageIdx = 0;
     },
+    loadHandPos(filePath) {
+      const json = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      this.posList = json.posList;
+    },
     goNextImage() {
       if (this.imageIdx < this.fileList.length - 1) {
         this.imageIdx += 1;
       }
     },
     goPreviousImage() {
-      if (this.imageIdx > 0) {
-        this.imageIdx -= 1;
-      }
+      this.imageIdx -= 1;
     },
     downloadPosList() {
-      if (this.imageIdx >= 0) {
-        const outputJSON = {
-          fileList: this.fileList,
-          posList: this.posList,
-        };
-        fs.writeFileSync(`${this.folderPath}/hand_position.json`, JSON.stringify(outputJSON));
-      }
+      const outputJSON = {
+        fileList: this.fileList,
+        posList: this.posList,
+      };
+      fs.writeFileSync(`${this.folderPath}/hand_position.json`, JSON.stringify(outputJSON));
     },
     resetCurrentPos() {
-      if (this.imageIdx >= 0) {
-        for (let i = 0; i < this.defaultPos.length; i += 1) {
-          this.posList[this.imageIdx][i] = this.defaultPos[i];
-        }
-        this.$refs.mainCanvas.render();
+      for (let i = 0; i < this.defaultPos.length; i += 1) {
+        this.posList[this.imageIdx][i] = this.defaultPos[i];
       }
+      this.$refs.mainCanvas.render();
+    },
+    flipPos(direct) {
+      if (direct === 'horizontal') {
+        for (let i = 0; i < this.defaultPos.length; i += 1) {
+          this.posList[this.imageIdx][i][0] = this.width - this.posList[this.imageIdx][i][0];
+        }
+      } else {
+        for (let i = 0; i < this.defaultPos.length; i += 1) {
+          this.posList[this.imageIdx][i][1] = this.height - this.posList[this.imageIdx][i][1];
+        }
+      }
+      this.$refs.mainCanvas.render();
     },
   },
 };
