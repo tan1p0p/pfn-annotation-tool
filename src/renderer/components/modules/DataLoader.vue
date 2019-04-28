@@ -1,12 +1,10 @@
 <template>
-  <div>
-    <label>画像ディレクトリ：</label>
-    <file-picker @set-path="setImageDir" webkitdirectory></file-picker>
+  <div class="container has-text-centered">
+    <file-picker @set-path="setImageDir" :folder="true" message="Choose a image directory"></file-picker>
     <br>
-    <label>セーブファイル：</label>
-    <file-picker @set-path="setJSONPath"></file-picker>
+    <file-picker @set-path="setJSONPath" :folder="false" message="Choose a save file... (optional)"></file-picker>
     <br>
-    <button @click="setPath">読み込む</button>
+    <button class="button is-primary" @click="setPath">Load files</button>
   </div>
 </template>
 
@@ -37,3 +35,7 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+
+</style>

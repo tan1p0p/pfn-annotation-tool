@@ -1,5 +1,5 @@
 <template>
-  <v-stage class="stage" :config="stageConfig">
+  <v-stage class="container stage" :config="stageConfig">
     <v-layer>
       <v-line v-for="(lineConfig, i) in lineConfigList" :key="i"
         :config="lineConfig"></v-line>
@@ -112,6 +112,12 @@ export default {
 
 <style lang="scss" scoped>
 .stage {
+  width: 600px;
+  height: 600px;
+  position: absolute;
+  right: 0;
+  left: 0;
+  margin: auto;
   background-size: 600px 600px;
   background-repeat: no-repeat;
 }

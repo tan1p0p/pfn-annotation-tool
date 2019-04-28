@@ -1,11 +1,16 @@
 <template>
   <div>
-    <data-loader @set-path="loadFiles"></data-loader>
-    <main-canvas
-      ref="mainCanvas"
-      :filepath="currentFilePath"
-      :handPos="currentHandPos"
-      :imageIdx="imageIdx"></main-canvas>
+    <div class="section">
+      <data-loader
+        @set-path="loadFiles"></data-loader>
+    </div>
+    <div class="section">
+      <main-canvas
+        ref="mainCanvas"
+        :filepath="currentFilePath"
+        :handPos="currentHandPos"
+        :imageIdx="imageIdx"></main-canvas>
+    </div>
   </div>
 </template>
 
@@ -46,6 +51,12 @@ export default {
     };
   },
   computed: {
+    isFilePicked() {
+      if (this.imageIdx === -1) {
+        return false;
+      }
+      return true;
+    },
     currentFilePath() {
       return this.fileList[this.imageIdx];
     },
@@ -55,7 +66,7 @@ export default {
   },
   mounted() {
     window.addEventListener('keydown', (event) => {
-      if (this.imageIdx >= 0) {
+      if (this.isFilePicked) {
         switch (event.keyCode) {
           case 78: // 'n' key for next pic.
             this.goNextImage();
@@ -69,7 +80,7 @@ export default {
       }
     });
     window.addEventListener('keyup', (event) => {
-      if (this.imageIdx >= 0) {
+      if (this.isFilePicked) {
         switch (event.keyCode) {
           case 83: // 's' key for save pos.
             this.downloadPosList();
@@ -115,7 +126,9 @@ export default {
     },
     loadHandPos(filePath) {
       const json = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      this.posList = json.posList;
+      for (let i = 0; i < this.posList.length; i += 1) {
+        this.posList[i] = json.posList[i];
+      }
     },
     goNextImage() {
       if (this.imageIdx < this.fileList.length - 1) {
@@ -123,7 +136,9 @@ export default {
       }
     },
     goPreviousImage() {
-      this.imageIdx -= 1;
+      if (this.imageIdx >= 1) {
+        this.imageIdx -= 1;
+      }
     },
     downloadPosList() {
       const outputJSON = {
