@@ -1,9 +1,9 @@
 <template>
   <div class="dataloader has-text-centered">
     <h2 class="subtitle">Choose image folder and savefile.</h2>
-    <file-picker @set-path="setImageDir" :folder="true" message="image folder"></file-picker>
+    <file-picker @set-path="setImageDir" :folder="true" message="image folder"/>
     <br>
-    <file-picker @set-path="setJSONPath" :folder="false" message="save file (optional)"></file-picker>
+    <file-picker @set-path="setJSONPath" :folder="false" message="save file (optional)"/>
     <br>
     <button class="button is-primary" @click="setPath">load files</button>
   </div>

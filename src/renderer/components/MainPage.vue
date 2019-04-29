@@ -1,10 +1,8 @@
 <template>
   <section class="section has-text-centered">
     <h1 class="title">Hand Pose Annotator</h1>
-    <div
-      v-if="!isFilePicked">
-      <data-loader
-        @set-path="loadFiles"></data-loader>
+    <div v-if="!isFilePicked">
+      <data-loader @set-path="loadFiles"/>
     </div>
     <div v-show="isFilePicked">
       <p>Click <a @click="isKeyBindVisible = true">here</a> or press "h" to see keybinds.</p>
@@ -12,23 +10,14 @@
         ref="mainCanvas"
         :filepath="currentFilePath"
         :handPos="currentHandPos"
-        :imageIdx="imageIdx"></main-canvas>
-      <aside class="key-binds" v-if="isKeyBindVisible">
-        <div class="key-binds__list box">
-          <button
-            class="delete is-pulled-right"
-            @click="isKeyBindVisible = false"></button>
-          <h2 class="title">Key Binds</h2>
-          <ul>
-            <li>Press "s" to save annotation file.</li>
-            <li>Press "r" to reset current annotation.</li>
-            <li>Press "n" to go to next image.</li>
-            <li>Press "b" to back to previous image.</li>
-            <li>Press "x" to flip vertically.</li>
-            <li>Press "z" to flip horizontally.</li>
-          </ul>
-        </div>
-      </aside>
+        :imageIdx="imageIdx"/>
+      <key-binds
+        v-if="isKeyBindVisible"
+        @close="isKeyBindVisible = false"/>
+      <save-window
+        v-if="isSaveWindowVisible"
+        @close="isSaveWindowVisible = false"
+        @save="savePosList"/>
     </div>
   </section>
 </template>
@@ -36,6 +25,8 @@
 <script>
 import DataLoader from '@/components/modules/DataLoader';
 import MainCanvas from '@/components/modules/MainCanvas';
+import KeyBinds from '@/components/modules/KeyBinds';
+import SaveWindow from '@/components/modules/SaveWindow';
 
 import fs from 'fs';
 import path from 'path';
@@ -45,6 +36,8 @@ export default {
   components: {
     DataLoader,
     MainCanvas,
+    KeyBinds,
+    SaveWindow,
   },
   data() {
     return {
@@ -68,6 +61,7 @@ export default {
         [190, 530], [250, 500], [320, 450],
       ],
       isKeyBindVisible: false,
+      isSaveWindowVisible: false,
     };
   },
   computed: {
@@ -115,7 +109,7 @@ export default {
             this.isKeyBindVisible = !this.isKeyBindVisible;
             break;
           case 83: // 's' key for save pos.
-            this.downloadPosList();
+            this.isSaveWindowVisible = !this.isSaveWindowVisible;
             break;
           case 82: // 'r' key for reset to default pos.
             this.resetCurrentPos();
@@ -172,12 +166,13 @@ export default {
         this.imageIdx -= 1;
       }
     },
-    downloadPosList() {
+    savePosList(folderPath) {
       const outputJSON = {
         fileList: this.fileList,
         posList: this.posList,
       };
-      fs.writeFileSync(`${this.folderPath}/hand_position.json`, JSON.stringify(outputJSON));
+      fs.writeFileSync(`${folderPath}/hand_position.json`, JSON.stringify(outputJSON));
+      this.isSaveWindowVisible = false;
     },
     resetCurrentPos() {
       for (let i = 0; i < this.defaultPos.length; i += 1) {
@@ -216,25 +211,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.key-binds {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-
-  &__list {
-    width: 600px;
-    height: 300px;
-    position: absolute;
-    margin: auto;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
-}
-</style>
