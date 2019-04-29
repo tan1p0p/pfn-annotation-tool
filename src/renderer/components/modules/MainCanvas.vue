@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-stage class="stage" :config="stageConfig">
+    <v-stage class="box stage" :config="stageConfig">
       <v-layer>
         <v-line
           v-for="(lineConfig, i) in lineConfigList"
@@ -152,8 +152,16 @@ export default {
   height: 600px;
   right: 0;
   left: 0;
-  margin: auto;
+  margin: 0.5rem auto;
+  padding: 0;
   background-size: 600px 600px;
   background-repeat: no-repeat;
+}
+
+.legend {
+  max-width: 600px;
+  right: 0;
+  left: 0;
+  margin: auto;
 }
 </style>

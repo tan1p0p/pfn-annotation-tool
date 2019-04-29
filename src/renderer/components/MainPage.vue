@@ -7,21 +7,29 @@
         @set-path="loadFiles"></data-loader>
     </div>
     <div v-show="isFilePicked">
-      <aside>
-        <ul>
-          <li>Press "s" key to save.</li>
-          <li>Press "r" key to reset current annotation.</li>
-          <li>Press "n" key to go next image.</li>
-          <li>Press "b" key to go previous image.</li>
-          <li>Press "x" key to flip vertically.</li>
-          <li>Press "z" key to flip horizontally.</li>
-        </ul>
-      </aside>
+    <!-- <div> -->
+      <p>Click <a @click="isKeyBindVisible = true">here</a> or press "h" to see keybinds.</p>
       <main-canvas
         ref="mainCanvas"
         :filepath="currentFilePath"
         :handPos="currentHandPos"
         :imageIdx="imageIdx"></main-canvas>
+      <aside class="key-binds" v-if="isKeyBindVisible">
+        <div class="key-binds__list box">
+          <button
+            class="delete is-pulled-right"
+            @click="isKeyBindVisible = false"></button>
+          <h2 class="title">Key Binds</h2>
+          <ul>
+            <li>Press "s" to save annotation file.</li>
+            <li>Press "r" to reset current annotation.</li>
+            <li>Press "n" to go to next image.</li>
+            <li>Press "b" to back to previous image.</li>
+            <li>Press "x" to flip vertically.</li>
+            <li>Press "z" to flip horizontally.</li>
+          </ul>
+        </div>
+      </aside>
     </div>
   </section>
 </template>
@@ -60,6 +68,7 @@ export default {
         [130, 440], [210, 420], [300, 400],
         [190, 530], [250, 500], [320, 450],
       ],
+      isKeyBindVisible: false,
     };
   },
   computed: {
@@ -94,6 +103,9 @@ export default {
     window.addEventListener('keyup', (event) => {
       if (this.isFilePicked) {
         switch (event.keyCode) {
+          case 72: // 'h' key for show keybinds.
+            this.isKeyBindVisible = !this.isKeyBindVisible;
+            break;
           case 83: // 's' key for save pos.
             this.downloadPosList();
             break;
@@ -180,3 +192,25 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.key-binds {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+
+  &__list {
+    width: 600px;
+    height: 300px;
+    position: absolute;
+    margin: auto;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+}
+</style>
