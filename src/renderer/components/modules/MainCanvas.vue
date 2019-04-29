@@ -1,19 +1,35 @@
 <template>
-  <v-stage class="container stage" :config="stageConfig">
-    <v-layer>
-      <v-line v-for="(lineConfig, i) in lineConfigList" :key="i"
-        :config="lineConfig"></v-line>
-    </v-layer>
-    <v-layer>
-      <v-circle v-for="(dotConfig, i) in dotConfigList" :key="i"
-        :config="dotConfig" @dragmove="updatePos"></v-circle>
-    </v-layer>
-  </v-stage>
+  <div>
+    <v-stage class="stage" :config="stageConfig">
+      <v-layer>
+        <v-line
+          v-for="(lineConfig, i) in lineConfigList"
+          :key="i"
+          :config="lineConfig"></v-line>
+      </v-layer>
+      <v-layer>
+        <v-circle
+          v-for="(dotConfig, i) in dotConfigList"
+          :key="i"
+          :config="dotConfig" @dragmove="updatePos"></v-circle>
+      </v-layer>
+    </v-stage>
+    <div class="legend">
+      <svg viewBox="0 0 650 30" xmlns="http://www.w3.org/2000/svg">
+        <g
+          v-for="(legendConfig, i) in legendConfigList"
+          :key="i">
+          <circle :cx="100 * i + 50" cy="15" r="5" :fill="legendConfig.color" stroke="black"/>
+          <text :x="100 * i + 60" y="20" font-size="15">{{ legendConfig.text }}</text>
+        </g>
+      </svg>
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'MainCanvas',
+  name: 'main-canvas',
   props: {
     filepath: String,
     handPos: {
@@ -40,12 +56,32 @@ export default {
       ],
     };
   },
+  computed: {
+    legendConfigList() {
+      const legendConfigList = [];
+      const textList = [
+        'origin',
+        'thumb',
+        'pointer',
+        'middle',
+        'ring',
+        'pinkie',
+      ];
+      for (let i = 0; i < 6; i += 1) {
+        legendConfigList.push({
+          color: this.colorList[i],
+          text: textList[i],
+        });
+      }
+      return legendConfigList;
+    },
+  },
   watch: {
     // Run when image file changes.
     filepath() {
       this.setLineConfigList();
       this.setDotConfigList();
-      this.$el.style.backgroundImage = `url(file://${this.filepath})`;
+      this.$el.children[0].style.backgroundImage = `url(file://${this.filepath})`;
     },
   },
   methods: {
@@ -114,7 +150,6 @@ export default {
 .stage {
   width: 600px;
   height: 600px;
-  position: absolute;
   right: 0;
   left: 0;
   margin: auto;

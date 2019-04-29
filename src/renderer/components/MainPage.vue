@@ -1,17 +1,29 @@
 <template>
-  <div>
-    <div class="section">
+  <section class="section has-text-centered">
+    <h1 class="title">Hand Pose Annotator</h1>
+    <div
+      v-if="!isFilePicked">
       <data-loader
         @set-path="loadFiles"></data-loader>
     </div>
-    <div class="section">
+    <div v-show="isFilePicked">
+      <aside>
+        <ul>
+          <li>Press "s" key to save.</li>
+          <li>Press "r" key to reset current annotation.</li>
+          <li>Press "n" key to go next image.</li>
+          <li>Press "b" key to go previous image.</li>
+          <li>Press "x" key to flip vertically.</li>
+          <li>Press "z" key to flip horizontally.</li>
+        </ul>
+      </aside>
       <main-canvas
         ref="mainCanvas"
         :filepath="currentFilePath"
         :handPos="currentHandPos"
         :imageIdx="imageIdx"></main-canvas>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
