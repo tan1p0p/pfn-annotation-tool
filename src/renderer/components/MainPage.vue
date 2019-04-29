@@ -7,7 +7,6 @@
         @set-path="loadFiles"></data-loader>
     </div>
     <div v-show="isFilePicked">
-    <!-- <div> -->
       <p>Click <a @click="isKeyBindVisible = true">here</a> or press "h" to see keybinds.</p>
       <main-canvas
         ref="mainCanvas"
@@ -73,10 +72,7 @@ export default {
   },
   computed: {
     isFilePicked() {
-      if (this.imageIdx === -1) {
-        return false;
-      }
-      return true;
+      return this.imageIdx !== -1;
     },
     currentFilePath() {
       return this.fileList[this.imageIdx];
@@ -94,6 +90,18 @@ export default {
             break;
           case 66: // 'b' key for previous pic.
             this.goPreviousImage();
+            break;
+          case 37: // '←' key for move left.
+            this.moveParallel('horizontal', 'minus', event.shiftKey ? 3 : 1);
+            break;
+          case 38: // '↑' key for move up.
+            this.moveParallel('vertical', 'minus', event.shiftKey ? 3 : 1);
+            break;
+          case 39: // '→' key for move right.
+            this.moveParallel('horizontal', 'plus', event.shiftKey ? 3 : 1);
+            break;
+          case 40: // '↓' key for move down.
+            this.moveParallel('vertical', 'plus', event.shiftKey ? 3 : 1);
             break;
           default:
             break;
@@ -177,14 +185,30 @@ export default {
       }
       this.$refs.mainCanvas.render();
     },
-    flipPos(direct) {
-      if (direct === 'horizontal') {
+    flipPos(direction) {
+      if (direction === 'horizontal') {
         for (let i = 0; i < this.defaultPos.length; i += 1) {
           this.posList[this.imageIdx][i][0] = this.width - this.posList[this.imageIdx][i][0];
         }
       } else {
         for (let i = 0; i < this.defaultPos.length; i += 1) {
           this.posList[this.imageIdx][i][1] = this.height - this.posList[this.imageIdx][i][1];
+        }
+      }
+      this.$refs.mainCanvas.render();
+    },
+    moveParallel(direction, sign, scale = 1) {
+      let amount = 10;
+      if (sign === 'minus') {
+        amount = -amount;
+      }
+      if (direction === 'horizontal') {
+        for (let i = 0; i < this.defaultPos.length; i += 1) {
+          this.posList[this.imageIdx][i][0] += amount * scale;
+        }
+      } else {
+        for (let i = 0; i < this.defaultPos.length; i += 1) {
+          this.posList[this.imageIdx][i][1] += amount * scale;
         }
       }
       this.$refs.mainCanvas.render();
